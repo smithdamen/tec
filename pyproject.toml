@@ -1,0 +1,23 @@
+[project]
+name = "tec"
+version = "0.0.1"
+description = "TEC – server-first roguelike MMO prototype"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+lint.select = ["E","F","I","UP","B"]
+format.quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_return_any = true
+show_error_codes = true
+mypy_path = ["src"]
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
