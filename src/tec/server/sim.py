@@ -1,4 +1,3 @@
-import time
 from collections import deque
 from dataclasses import dataclass, field
 
@@ -61,14 +60,3 @@ class Simulation:
             act.energy -= cost
             if eid in needz:
                 tick_needs(needz[eid], act)
-
-    def run_forever(self) -> None:
-        next_time = time.perf_counter()
-        while True:
-            now = time.perf_counter()
-            if now >= next_time:
-                self.tick()
-                next_time += self.tick_len
-            remain = next_time - time.perf_counter()
-            if remain > 0:
-                time.sleep(min(remain, 0.01))

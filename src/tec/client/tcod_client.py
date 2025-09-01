@@ -1,6 +1,7 @@
 import asyncio
 import json
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import tcod
 import tcod.event
@@ -66,6 +67,26 @@ class Client:
                 self.vm.aps = float(msg["aps"])
                 self.vm.eta = float(msg["eta"])
 
+    def _load_tileset(self) -> tcod.tileset.Tileset:
+        """Load a known-good TrueType tileset.
+
+        We use DejaVu Sans Mono (Arch package: ttf-dejavu).
+        """
+        candidates = [
+            Path("DejaVuSansMono.ttf"),
+            Path("/usr/share/fonts/TTF/DejaVuSansMono.ttf"),
+            Path("/usr/share/fonts/TTF/DejaVuSansMonoNerdFontMono.ttf"),
+        ]
+        for path in candidates:
+            if path.exists():
+                # 16x16 works well for a 100x40 grid window
+                return tcod.tileset.load_truetype_font(str(path), 16, 16)
+        raise RuntimeError(
+            "Could not locate a TrueType font for tcod.\n"
+            "Install 'ttf-dejavu' and ensure /usr/share/fonts/TTF/DejaVuSansMono.ttf exists,\n"
+            "or edit _load_tileset() with the path to a monospace TTF on your system."
+        )
+
     def draw(self, console: tcod.console.Console) -> None:
         console.clear()
         # map viewport (top-left with 1-char padding)
@@ -92,7 +113,8 @@ class Client:
         )
 
     async def run(self) -> None:
-        tileset = tcod.tileset.get_default()
+        tileset = self._load_tileset()
+        # 100x40 window as requested
         with tcod.context.new(
             width=100,
             height=40,
