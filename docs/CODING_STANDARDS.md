@@ -1,10 +1,9 @@
 # Coding Standards
 
-- **Layout:** `src/tec` + `tests`.
-- **Typing:** PEP 484/604, `mypy` strict. No `Any` unless unavoidable.
-- **Style:** `ruff` clean; 100-col limit; one statement per line.
-- **Server is authoritative.** All client actions go to server; server sends events.
-- **Protocol:** JSON Lines, message has `"type"` plus a stable schema. Document changes in `docs/PROTOCOL.md`.
-- **Small PRs:** Prefer < 300 lines per change; split otherwise.
-- **Tests:** Add at least one pytest for new server behavior or protocol shapes.
-- **Docs:** Update GDD/ARCHITECTURE/ADR when you make an architectural change.
+- Layout: `src/tec` and `tests`. `src` layout imports as `from tec...`.
+- Typing: PEP 484/604; `mypy` clean. No untyped defs in `src`; tests may be lighter but typed helpers preferred.
+- Style: `ruff` clean; 100-col max; one statement per line.
+- Messages: JSON Lines with `"type"`, documented in `docs/PROTOCOL.md`.
+- Small PRs: aim for <300 LOC; split otherwise.
+- Tests: add at least one test for each new server behavior or protocol change.
+- Docs: update `ARCHITECTURE.md`, `PROTOCOL.md`, and `GDD.md` when behavior that users see changes.

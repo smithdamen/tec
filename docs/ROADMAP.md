@@ -1,17 +1,23 @@
 # TEC Roadmap (rolling)
 
+## ✅ Done (Sep 2025)
+- Server-auth ticks & protocol
+- Roguelike input + centered viewport
+- FOV: Euclidean, day/night radius, explored memory
+- CI: ruff/mypy/pytest; guardrail tests
+
 ## Now
-- FOV: server-side shadowcasting, client shows only visible tiles.
-- Sidebar needs bars: hunger, thirst, exposure (decreasing over time).
-- Items + PICKUP action (`g`) and simple item on map.
+- Refactor all code in repository to include code commenting and very detailed documentation
+- Update all docs according to requirements
+- Needs UI: hunger/thirst/exposure bars; server decays needs per tick
+- Items + pickup (`g`): place item on map; inventory on server
 
 ## Next
-- Resource mapgen: trees/water/stone/fiber/scrap.
-- Craft: hand axe, campfire, water container.
-- Hamlets (safe zones) with NPCs and a vendor.
-- Configurable keymap per user.
+- Resource tiles in mapgen: trees, water, stone, fiber, scrap
+- Simple craft: hand axe, campfire, container
+- Hamlets (safe zones) with NPCs and a vendor
 
 ## Later
-- Accounts/authentication, sessions.
-- Latency compensation for actions (server-authoritative).
-- Persistence: save world & characters to disk.
+- Auth/sessions; persistence (world & characters)
+- Lighting levels and multiple light sources
+- Latency compensation & reconciliation

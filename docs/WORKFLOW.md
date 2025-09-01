@@ -57,3 +57,7 @@ If pre-commit makes auto-fixes:
   6. git push → sync to GitHub
 
 Keep this cycle tight. Short commits, clean diffs, green checks.
+
+Run locally
+  1. make run-server
+  2. make run-client

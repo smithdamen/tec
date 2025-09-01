@@ -1,26 +1,27 @@
 # Field of View (FOV)
 
-## Model
-- World grid: `tiles[y][x]` → `True = floor (transparent)`, `False = wall (opaque)`.
-- Player FOV radius: `SETTINGS.fov_radius` (Chebyshev distance, i.e., king moves).
+## Problem
+Reveal only what the actor could plausibly see, without leaking information to clients.
 
 ## Algorithm
-We use **Symmetric Shadowcasting**:
-
-- Sweep 8 octants around the origin `(px, py)`.
-- For each octant, iterate rows at increasing distance (1..radius).
-- Maintain a visible slope interval `[start, end]` for that row.
-- When an opaque cell segment is encountered, shrink the interval for deeper rows
-  by recursing with a new `[start, right_slope]` or `[left_slope, end]`.
-
-This creates a smooth, natural FOV that respects walls.
+- **Symmetric Shadowcasting**, Euclidean cutoff (rounded circle).
+- We sweep 8 octants. For each we scan rows outward, tracking a slope interval `[start,end]` which remains unobstructed. Opaque cells shrink the interval for deeper rows, producing shadows behind walls.
+- We mark **blocking cells visible** when hit, so walls at the edge of sight appear.
 
 ## Integration
-- `tec.shared.fov.shadowcast(px, py, radius, is_opaque) -> set[(x,y)]`.
-- `ev_view(..., visible=...)` blanks any tile not in the `visible` set.
-- The server computes FOV on each snapshot to keep `VIEW` and `POS` consistent.
+- Server computes `visible = shadowcast(px, py, radius, is_opaque)`.
+- `ev_view(origin, tiles, visible, explored)` builds three strings:
+  - `tiles`: masked by current visibility.
+  - `base`: ground truth glyphs (unmasked).
+  - `mem`: explored mask (1 = has been seen).
+- Client renders:
+  - visible: `.`/`#`
+  - explored-but-not-visible: dim ASCII (`,` for floor, `%` for wall)
+  - unknown: space.
 
-## Future
-- **Memory (explored)**: retain last seen tiles and draw them dimmed.
-- **Lighting**: multiple light sources; combine FOV with light intensity.
-- **Performance**: cache per-player FOV when neither pos nor map changes.
+## Dynamic radius
+- Ambient factor from a sine day/night (`SETTINGS.day_seconds`) maps between `fov_night` and `fov_day`.
+- Future modifiers: carried lights, indoors, weather.
+
+## Why server-side?
+- Prevents map/ESP cheats; keeps view consistent across clients.
