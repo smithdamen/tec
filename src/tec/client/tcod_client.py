@@ -26,7 +26,9 @@ class ViewModel:
     vy0: int = 0
     w: int = SETTINGS.view_w
     h: int = SETTINGS.view_h
-    tiles: list[str] = field(default_factory=list)
+    tiles: list[str] = field(default_factory=list)  # masked visible only
+    base: list[str] = field(default_factory=list)  # unmasked true glyphs
+    mem: list[str] = field(default_factory=list)  # '0'/'1' explored mask
     log: list[str] = field(default_factory=list)
     speed: float = 1.0
     energy: float = 0.0
@@ -69,8 +71,16 @@ class Client:
                 self.vm.w = int(msg["w"])
                 self.vm.h = int(msg["h"])
                 tiles_str = msg["tiles"]
+                base_str = msg.get("base", "")
+                mem_str = msg.get("mem", "")
                 self.vm.tiles = [
                     tiles_str[i : i + self.vm.w] for i in range(0, len(tiles_str), self.vm.w)
+                ]
+                self.vm.base = [
+                    base_str[i : i + self.vm.w] for i in range(0, len(base_str), self.vm.w)
+                ]
+                self.vm.mem = [
+                    mem_str[i : i + self.vm.w] for i in range(0, len(mem_str), self.vm.w)
                 ]
             elif mtype == "LOG":
                 self.vm.log.append(str(msg["text"]))
@@ -148,12 +158,27 @@ class Client:
         max_rows = min(self.vm.h, map_h)
         max_cols = min(self.vm.w, map_w)
         for row_i in range(max_rows):
-            row = self.vm.tiles[row_i] if row_i < len(self.vm.tiles) else ""
-            row = (row[:max_cols]).ljust(max_cols, "#")
-            for col_i, ch in enumerate(row):
-                console.print(map_x0 + col_i, map_y0 + row_i, ch)
+            row_vis = self.vm.tiles[row_i] if row_i < len(self.vm.tiles) else ""
+            row_base = self.vm.base[row_i] if row_i < len(self.vm.base) else ""
+            row_mem = self.vm.mem[row_i] if row_i < len(self.vm.mem) else ""
+            # pad out rows
+            row_vis = (row_vis[:max_cols]).ljust(max_cols, " ")
+            row_base = (row_base[:max_cols]).ljust(max_cols, " ")
+            row_mem = (row_mem[:max_cols]).ljust(max_cols, "0")
 
-        # Player '@' relative to view origin
+            for col_i in range(max_cols):
+                ch = row_vis[col_i]
+                if ch != " ":
+                    console.print(map_x0 + col_i, map_y0 + row_i, ch)
+                else:
+                    # not currently visible; if explored, draw a dim glyph
+                    if row_mem[col_i] == "1":
+                        base_ch = row_base[col_i]
+                        dim = "," if base_ch == "." else "%"
+                        console.print(map_x0 + col_i, map_y0 + row_i, dim)
+                    # else keep as space
+
+        # Player '@' overlay (only if inside current VIEW)
         rx = self.vm.x - self.vm.vx0
         ry = self.vm.y - self.vm.vy0
         if 0 <= rx < max_cols and 0 <= ry < max_rows:
@@ -180,6 +205,7 @@ class Client:
 
         console.print(inner_x, H - 1, " Arrows/vi/numpad move  '.'/5 wait  ESC quit ")
 
+    #
     async def run(self) -> None:
         tileset = self._load_tileset()
         with tcod.context.new(
