@@ -22,6 +22,7 @@ class Simulation:
     tiles: list[list[bool]] = field(default_factory=_new_map)
     action_queues: dict[EID, deque[Action]] = field(default_factory=dict)
     tick_len: float = field(default=1.0 / SETTINGS.tick_rate_hz)
+    time_s: float = 0.0  # simulated seconds since world start
 
     def ensure_queue(self, eid: EID) -> deque[Action]:
         return self.action_queues.setdefault(eid, deque())
@@ -41,6 +42,9 @@ class Simulation:
         self.ensure_queue(eid).append(("wait", None))
 
     def tick(self) -> None:
+        # advance world time
+        self.time_s += self.tick_len
+
         actors = self.world.get(Actor)
         positions = self.world.get(Position)
         needz = self.world.get(Needs)

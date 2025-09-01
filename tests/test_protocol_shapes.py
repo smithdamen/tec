@@ -14,9 +14,10 @@ def test_ev_view_shape_and_size() -> None:
         [True, False, True],
         [False, True, False],
     ]
-    msg = json.loads(ev_view(0, 0, tiles).decode())
+    msg = json.loads(ev_view(0, 0, tiles, visible=None, explored=set()).decode())
     assert msg["type"] == "VIEW"
-    assert set(msg.keys()) == {"type", "x", "y", "w", "h", "tiles"}
+    assert set(msg.keys()) == {"type", "x", "y", "w", "h", "tiles", "base", "mem"}
     w, h = msg["w"], msg["h"]
-    assert isinstance(msg["tiles"], str)
-    assert len(msg["tiles"]) == w * h
+    for key in ("tiles", "base", "mem"):
+        assert isinstance(msg[key], str)
+        assert len(msg[key]) == w * h
