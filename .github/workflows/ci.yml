@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # libtcod runtime needs SDL2 at import-time even if we don't open a window
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-2.0-0
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install tcod ruff mypy pytest
+
+      - name: Ruff Format (check)
+        run: ruff format --check src tests
+
+      - name: Ruff Lint
+        run: ruff check src tests
+
+      - name: Mypy
+        run: mypy src tests
+
+      - name: Pytest
+        run: pytest -q

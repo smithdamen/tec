@@ -24,7 +24,7 @@ class JsonServer:
         writer.write(ev_welcome("Welcome to TEC (prototype)."))
         await writer.drain()
 
-        # initial view + stats
+        # initial snapshot
         pos = self.sim.world.get(Position)[eid]
         actor = self.sim.world.get(Actor)[eid]
         writer.write(ev_pos(pos.x, pos.y))
@@ -33,8 +33,8 @@ class JsonServer:
         writer.write(ev_stats(stats["speed"], stats["energy"], stats["aps"], stats["eta"]))
         await writer.drain()
 
-        # periodic view updates
-        asyncio.create_task(self._view_pump(writer, eid))
+        # periodic snapshot pump
+        asyncio.create_task(self._snapshot_pump(writer, eid))
 
         try:
             while not reader.at_eof():
@@ -51,14 +51,18 @@ class JsonServer:
             writer.close()
             await writer.wait_closed()
 
-    async def _view_pump(self, writer: asyncio.StreamWriter, eid: int) -> None:
+    async def _snapshot_pump(self, writer: asyncio.StreamWriter, eid: int) -> None:
+        """Keep client view and pos in sync even when they didn't press a key."""
         try:
             while writer in self.sessions:
                 pos = self.sim.world.get(Position)[eid]
+                # IMPORTANT: send POS and VIEW together, in that order.
+                writer.write(ev_pos(pos.x, pos.y))
                 writer.write(ev_view(pos.x, pos.y, self.sim.tiles))
                 await writer.drain()
-                await asyncio.sleep(0.2)
+                await asyncio.sleep(0.1)
         except Exception:
+            # Client disconnected or writer broken; let handle_client clean up.
             pass
 
     async def dispatch(
@@ -75,16 +79,15 @@ class JsonServer:
         elif mtype == "WAIT":
             self.sim.enqueue_wait(eid)
         elif mtype == "LOGIN":
-            # name handling later
             pass
         else:
-            # unknown message type; ignore
             pass
 
-        # push fresh pos + stats after any input
+        # Send a quick snapshot right after input (still pre-tick, but consistent)
         pos = self.sim.world.get(Position)[eid]
         actor = self.sim.world.get(Actor)[eid]
         writer.write(ev_pos(pos.x, pos.y))
+        writer.write(ev_view(pos.x, pos.y, self.sim.tiles))
         stats = derive_stats(actor, MOVE_COST)
         writer.write(ev_stats(stats["speed"], stats["energy"], stats["aps"], stats["eta"]))
         await writer.drain()
