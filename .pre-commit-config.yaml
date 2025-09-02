@@ -14,3 +14,12 @@ repos:
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
+  - repo: https://github.com/econchick/interrogate
+    rev: 1.7.0
+    hooks:
+      - id: interrogate
+        args:
+          - "--fail-under=0"          # <— do not block commits during the doc pass
+          - "-c"
+          - "pyproject.toml"
+          - "src/tec"

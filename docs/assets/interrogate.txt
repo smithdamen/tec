@@ -1,0 +1,23 @@
+================================ Coverage for /home/d/code/tec/src/tec/ ================================
+----------------------------------------------- Summary ------------------------------------------------
+| Name                                 |         Total |         Miss |         Cover |         Cover% |
+|--------------------------------------|---------------|--------------|---------------|----------------|
+| __init__.py                          |             1 |            1 |             0 |             0% |
+| settings.py                          |             2 |            2 |             0 |             0% |
+| client/keymap.py                     |             2 |            1 |             1 |            50% |
+| client/tcod_client.py                |            14 |           14 |             0 |             0% |
+| server/main.py                       |             3 |            3 |             0 |             0% |
+| server/net.py                        |            11 |            9 |             2 |            18% |
+| server/protocol.py                   |             6 |            5 |             1 |            17% |
+| server/sim.py                        |             8 |            8 |             0 |             0% |
+| shared/actions.py                    |             4 |            4 |             0 |             0% |
+| shared/components.py                 |             5 |            5 |             0 |             0% |
+| shared/fov.py                        |             5 |            4 |             1 |            20% |
+| shared/mapgen.py                     |             2 |            2 |             0 |             0% |
+| shared/types.py                      |             6 |            6 |             0 |             0% |
+| shared/world.py                      |             6 |            6 |             0 |             0% |
+| shared/systems/movement.py           |             2 |            2 |             0 |             0% |
+| shared/systems/needs.py              |             2 |            2 |             0 |             0% |
+|--------------------------------------|---------------|--------------|---------------|----------------|
+| TOTAL                                |            79 |           74 |             5 |           6.3% |
+----------------------------- RESULT: PASSED (minimum: 0.0%, actual: 6.3%) -----------------------------
