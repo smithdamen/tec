@@ -6,7 +6,22 @@ requires-python = ">=3.11"
 
 [tool.ruff]
 line-length = 100
-lint.select = ["E","F","I","UP","B"]
+lint.select = [
+  "E", "F", "I",        # basics
+  "D",                  # pydocstyle (docstring) rules
+  "UP", "B", "A",       # pyupgrade, bugbear, builtins
+]
+lint.ignore = [
+  # Allow missing docstrings for __init__ methods in dataclasses, etc., if desired:
+  "D100","D101","D102","D103","D104","D105","D106","D107",  # missing docstrings (module/class/func/etc.)
+  "D417",   # missing argument descriptions (will re-enable later)
+]
+# Tell Ruff our chosen docstring convention (affects some checks)
+lint.pydocstyle.convention = "google"
+
+# Optional: exclude generated or obvious-no-docs files
+exclude = ["tests/fixtures", "src/tec/_generated"]
+
 format.quote-style = "double"
 
 [tool.mypy]
@@ -21,3 +36,21 @@ files = ["src", "tests"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.interrogate]
+# Start modest; we’ll ratchet this up PR-by-PR.
+fail-under = 50
+
+# What to ignore (tweak as you like)
+ignore-init-method = true
+ignore-private = false            # Count private helpers at first to avoid "0 total"
+ignore-module = false
+ignore-nested-functions = false
+
+# IMPORTANT: use ignore-regex (NOT whitelist) to exclude tests.
+# (whitelist-regex means "only include these", which likely caused your 0-total)
+ignore-regex = ["^test_.*", ".*conftest.*"]
+exclude = ["^build/", "^dist/", "^\\.venv/", "^\\.direnv/", "^\\.mypy_cache/"]
+
+# Verbosity: 0 (quiet) .. 2 (very verbose)
+verbose = 1

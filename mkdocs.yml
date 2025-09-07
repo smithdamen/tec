@@ -1,0 +1,37 @@
+site_name: TEC Docs
+repo_url: https://github.com/smithdamen/tec
+docs_dir: docs
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          # Make 'tec' importable (package lives under src/tec)
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            separate_signature: true
+
+nav:
+  - Home: index.md
+  - Architecture: ARCHITECTURE.md
+  - Coding Standards: CODING_STANDARDS.md
+  - Game Design Doc (GDD): GDD.md
+  - Workflow: WORKFLOW.md
+  - Source Layout: SOURCE_LAYOUT.md
+  - Ticks & Time: TICKS_AND_TIME.md
+  - Protocol: PROTOCOL.md
+  - FOV: FOV.md
+  - Working with Assistant: WORKING_WITH_ASSISTANT.md
+  - ADR:
+      - "ECS & Ticks": ADR/0001-ecs-and-ticks.md
+      - "FOV & Visibility": ADR/0002-fov-and-visibility.md
+  - Devlog:
+      - "2025-09-01": DEVLOG/2025-09-01.md
+  - Contributing:
+      - "Docs & Comments Style": STYLE_DOCSTRINGS.md
+      - "Docstring stubs (latest)": assets/docstring_stubs.md
+  - API:
+      - tec: api/tec.md

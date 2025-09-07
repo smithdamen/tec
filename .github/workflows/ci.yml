@@ -4,7 +4,19 @@ on:
   push:
   pull_request:
 
+# Needed for GitHub Pages deployment from this workflow
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Ensure only one Pages deployment runs at a time
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
+  # === Your existing lint/test job (unchanged) ===
   build:
     runs-on: ubuntu-latest
     steps:
@@ -37,3 +49,80 @@ jobs:
 
       - name: Pytest
         run: pytest -q
+
+  # === Docstring coverage gate (fails PRs if below fail-under) ===
+  docs_cov_gate:
+    name: Docstring coverage gate
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install interrogate
+        run: pip install interrogate
+
+      - name: Enforce coverage threshold
+        run: |
+          mkdir -p docs/assets
+          interrogate -c pyproject.toml src/tec
+
+      # Always produce artifacts (report + badge), even if the gate failed
+      - name: Generate coverage artifacts (non-blocking)
+        if: always()
+        run: |
+          mkdir -p docs/assets
+          interrogate -c pyproject.toml --fail-under=0 -o docs/assets/interrogate.txt src/tec || true
+          interrogate -c pyproject.toml --fail-under=0 --generate-badge docs/assets/interrogate.svg src/tec || true
+
+      - name: Upload interrogate artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: interrogate-report
+          path: docs/assets/interrogate.*
+
+  # === Build docs to catch broken links/docstrings ===
+  docs_build:
+    name: Build docs
+    runs-on: ubuntu-latest
+    needs: [docs_cov_gate]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install docs deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install mkdocs mkdocstrings mkdocstrings-python
+
+      - name: Build site (MkDocs)
+        run: mkdocs build --strict
+
+      # Package site for Pages deploy
+      - name: Upload site artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  # === Deploy to GitHub Pages (only on push to master) ===
+  deploy_pages:
+    name: Deploy Docs to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [docs_build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,3 +1,11 @@
+"""Keyboard mapping for roguelike input.
+
+Supported movement keys:
+- Arrow keys
+- Vi keys: h j k l (plus y/u/b/n diagonals if enabled)
+- Numpad (if available in the terminal)
+"""
+
 from tec.shared.actions import Action, ActMove, ActWait
 
 VIM_DIRS = {

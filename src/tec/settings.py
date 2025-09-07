@@ -1,8 +1,22 @@
+"""Global engine settings shared by server and client.
+
+Centralizes knobs like tick rate and world dimensions so tests and gameplay
+can agree on consistent values. Import from this module rather than hard-coding.
+"""
+
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class Settings:
+    """Immutable configuration values used across the engine.
+
+    Attributes:
+        tick_rate_hz: Simulation ticks per second (Hz).
+        map_width: World width in tiles.
+        map_height: World height in tiles.
+    """
+
     tick_rate_hz: int = 10
     map_width: int = 100
     map_height: int = 40

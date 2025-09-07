@@ -1,9 +1,24 @@
+"""Tiny map generation helpers for building a walkable tile grid.
+
+Tiles are booleans where True=floor (walkable) and False=wall (blocks).
+"""
+
 import random
 
 # True = floor, False = wall
 
 
 def generate_map(width: int, height: int, seed: int) -> list[list[bool]]:
+    """Return a width×height boolean grid seeded by `seed`.
+
+    Args:
+        width: Number of columns.
+        height: Number of rows.
+        seed: RNG seed for deterministic maps in tests.
+
+    Returns:
+        Row-major 2D array where True=floor and False=wall.
+    """
     rng = random.Random(seed)
     tiles = [[False for _ in range(width)] for _ in range(height)]
     x, y = width // 2, height // 2
